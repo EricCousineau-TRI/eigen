@@ -72,6 +72,7 @@ template<typename MatrixType> void cholesky(const MatrixType& m)
   MatrixType a0 = MatrixType::Random(rows,cols);
   VectorType vecB = VectorType::Random(rows), vecX(rows);
   MatrixType matB = MatrixType::Random(rows,cols), matX(rows,cols);
+  Matrix<Scalar, MatrixType::RowsAtCompileTime, Dynamic> vec0(rows, 0), mat0(rows, 0);
   SquareMatrixType symm =  a0 * a0.adjoint();
   // let's make sure the matrix is not singular or near singular
   for (int k=0; k<3; ++k)
@@ -90,6 +91,9 @@ template<typename MatrixType> void cholesky(const MatrixType& m)
     VERIFY_IS_APPROX(symm * vecX, vecB);
     matX = chollo.solve(matB);
     VERIFY_IS_APPROX(symm * matX, matB);
+
+    // Check for zero-width matrices (when profiling).
+    mat0 = chollo.solve(mat0);
 
     const MatrixType symmLo_inverse = chollo.solve(MatrixType::Identity(rows,cols));
     RealScalar rcond = (RealScalar(1) / matrix_l1_norm<MatrixType, Lower>(symmLo)) /
